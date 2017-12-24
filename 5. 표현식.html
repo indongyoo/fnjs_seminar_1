@@ -11,6 +11,8 @@
 // ------ 2시간 10분
 
 // 1. fif () () 만들기
+  // 1) 그 전에 findval과 find 만들기
+  // 2) fif () () 만들기
 
 function findval(list, predi) {
   var i = 0, count = length(list);
@@ -39,7 +41,9 @@ go(
 function fif() {
   var pbs = [];
   evaluation.else_if = predi;
-  evaluation.else = function() { return predi(function() { return true }).apply(null, arguments); };
+  evaluation.else = function() {
+    return predi(function() { return true }).apply(null, arguments);
+  };
   return predi.apply(null, arguments);
 
   function predi() {
