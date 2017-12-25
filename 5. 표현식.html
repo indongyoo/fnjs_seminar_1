@@ -33,7 +33,7 @@ go(2,
       function(a) { return a; } ),
   log);
 
-function fif() {
+/*function fif() {
   var t = ternary.apply(null, arguments);
   function if_then(arg) {
     return t(function() {})(arg);
@@ -45,6 +45,15 @@ function fif() {
     t = t.apply(null, arguments);
     return if_then;
   };
+}*/
+
+function fif() {
+  var a, b = function(v) { return v };
+  var t = ternary.apply(null, arguments)
+    (function(v) { return a(v); })
+    (function(v) { return b(v); });
+  t.else = function() { return b = pipe.apply(null, arguments), t; };
+  return function() { return a = pipe.apply(null, arguments), t; }
 }
 
 go(3,
@@ -60,67 +69,6 @@ go(3,
   function(v) {
     console.log(v);
   });
-
-// 1. fif () () 만들기
-  // 1) 그 전에 findval과 find 만들기
-  // 2) fif () () 만들기
-/*
-function findval(list, predi) {
-  var i = 0, count = list.length;
-  return function recur(memo) {
-    while (memo === undefined && i < count) memo = predi(list[i++]);
-    return memo && memo.constructor == Promise ? memo.then(recur) : memo;
-  } ();
-}
-
-function find(list, predi) {
-  return findval(list, function(val) {
-    return go(val, predi, v => v ? val : undefined);
-  });
-}
-
-console.log(find([1,2,3,4,5], function(v) {
-  return v > 3;
-}));
-
-go(
-  findval([undefined, undefined, 10, 20], function(v) {
-    return Promise.resolve(v);
-  }),
-  log);
-
-
-/!*function fif() {
-  var pbs = [];
-  evaluation.else_if = predi;
-  evaluation.else = function() {
-    return predi(function() { return true; }).apply(null, arguments);
-  };
-  return predi.apply(null, arguments);
-
-  function predi() {
-    pbs.push({ predi: pipe.apply(null, arguments) });
-    return function body() {
-      pbs[pbs.length-1].body = pipe.apply(null, arguments);
-      return evaluation;
-    };
-  }
-  function evaluation() {
-    var args = arguments;
-    return go(
-      find(pbs, function(pb) { return pb.predi.apply(null, args); }),
-      function(pb) { return pb.body.apply(null, args) });
-  }
-}
-
-fif (v=> v == 10) (
-  v => console.log('fif', v)
-) .else_if (v=> v == 20) (
-  v => console.log('else_if', v)
-) .else (
-  v => console.log('else', v)
-) (30)*!/*/
-
 </script>
 
 </body>
