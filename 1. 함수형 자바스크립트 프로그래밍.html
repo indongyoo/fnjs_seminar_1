@@ -3,33 +3,178 @@
 <head>
   <meta charset="UTF-8">
   <title>함수형 자바스크립트 프로그래밍</title>
+  <script src="js/functional.js"></script>
 </head>
 <body>
 
 <script>
+
   // 1. 함수의 종류
   //   1) 순수 함수
-  //   2) 부수 효과
+  function add(a, b) {
+    return a + b;
+  }
+  //   2) 부수 효과 (없어도 프로그래밍이 가능한)
 
+  var c = 10;
+  function add2(a, b) {
+    return a + b + c;
+  }
+
+  log(add2(10, 10));
+
+  c = 20; // <-- 외부의 영향을 받음
+
+  log(add2(10, 10));
+
+  var d = 20;
+  function add3(a) {
+    d += a; // <-- 외부에 영향을 줌
+    return d;
+  }
+  log(add3(20));
+  log(add3(20));
+
+  var list = [1, 2, 3];
+  list.pop(); // <--- 이것도 부수 효과 값을 직접 변경함
+  log(list);
+</script>
+
+<div id="color"></div>
+
+<script>
+  //   3) 꼭 필요한 부수 효과
+  Object.assign(document.querySelector('#color').style, {
+    background: 'red',
+    width: '100px',
+    height: '100px'
+  });
+
+  log(100);
+</script>
+
+<script>
   // 2. 함수의 특징
   //  - 함수형 프로그래밍을 지탱하는 가장 중요한 개념 두가지
   //  1) 일급 함수
-  //  2) 클로저
+    // - 함수를 값으로 다룰 수 있다.
+    // - 값은 변수에 담을 수 있고, 인자로 사용할 수 있고, 리턴할 수 있다.
+    var a = function() {
+      return 'a';
+    };
+    log( a() );
 
-  // 3. 함수의 종류 심화
+    var call = function(f) {
+      return f();
+    };
+
+    log( call(a) );
+
+  //  2) 클로저
+    function constant(v) {
+      return function() {
+        return v;
+      }
+    }
+
+    var b = constant('b');
+    var c = constant('c');
+    log( b() );
+    log( c() );
+    log( constant('hi')() );
+
+    var scope = function() {
+      var a = 10; // <-- 외부 환경
+      return function closure(b) { // <-- 외부 환경에 있는 변수를 내부에서 사용하고 있는 함수
+        return a + b;
+      }
+    };
+    var imclosure = scope();
+    console.log( imclosure(20) );
+    // 클로저란?
+    //  - 자신이 생성될 때의 스코프에서 알 수 있는 변수를 내부에서 사용하고 있어 유지시키는 함수 (혹은 값과 함수)
+
+    var scope2 = function() {
+      return function() {
+        var a = 10;
+        var b = 20;
+        return a + b;
+      }
+    };
+    scope2();
+
+    var scope3 = function() {
+      var a = 10;
+      var b = 20;
+      function im_not_closure() {
+        return a + b;
+      }
+      return im_not_closure();
+    }
+    // f는 클로저일까요? X
+
+    // 일급 함수와 클로저는 함수형 프로그래밍 기술을 지탱하는 거의 전부라고 할 수 있습니다.
+    // 함수형 프로그래밍 패러다임, 언어, 주요 함수들은 모두 이 두가지 개념을 기반으로 만들어져 있습니다.
+
+  // 3. 함수의 종류 심화, 그리고 6가지
   //   1) 순수 함수
   //   2) 부수 효과
-  //   3) * 값을 변경하는 순수 함수 (새로운 값을 만드는 식으로)
-  //   4) * 함수를 리턴하는 함수 (고차 함수)
-  //      - add_maker
-  //   5) * 함수가 함수를 인자로 받아서 실행하는 함수 (고차 함수, 응용형 프로그래밍)
-  //      - repeat
+</script>
 
-  // 4. 함수형 프로그래밍을 하는 방법
+<input type="number" id="input1">
+
+<script>
+  //   3) 꼭 필요한 부수 효과
+
+  set_attr(set_attr(sel1('#input1'), 'value', 10), 'max', 12);
+
+  //   4) * 값을 변경하는 순수 함수 (새로운 값을 만드는 식으로)
+  function addx(obj, x) {
+    return { x: obj.x + x, y: obj.y };
+  }
+  var a = { x: 10, y: 20 };
+  log( addx(a, 20) );
+  log( a );
+
+  function merge(obj, obj2) {
+    return Object.assign({}, obj, obj2);
+  }
+  log( merge(a, { x: 50 }) );
+  log( a );
+
+  //   5) * 함수를 리턴하는 함수 (고차 함수)
+  //      - add_maker
+  function add_maker(a) {
+    return function(b) { // <-- 클로저
+      return a + b;
+    }
+  }
+  var add10 = add_maker(10);
+  log( add10(50) );
+
+  //   6) * 함수가 함수를 인자로 받아서 실행하는 함수 (고차 함수, 응용형 프로그래밍 Applicative programming)
+  //      - repeat
+  function repeat(count, fn) {
+    var i = 0;
+    while (count--) fn(i++);
+  }
+  repeat(10, function(i) {
+    log(i);
+  });
+
+  // 5. 함수형 프로그래밍에서 사용하는 함수
+    //  1) 순수 함수
+    //  2) 값을 변경하는 순수 함수 (새로운 값을 만드는 식으로, 불변성)
+    //  3) 함수를 리턴하는 고차 함수 (클로저, 부분 적용, 함수 조합 등 ...)
+    //  4) 함수가 함수를 인자로 받아서 실행하는 함수 (map, filter, reduce)
+    //  5) 꼭 필요한 부수 효과 함수
+
+  // 6. 함수형 프로그래밍을 하는 방법
   //   1) 위 5가지 타입의 함수를 적절히 조합하며 순수 함수의 비중을 높인다.
   //   2) 문(statments) 보다는 표현식(expression)을 위주로 코딩한다.
   //   3) 변수 사용을 줄이고, 값을 변경하지 않는다.
   //   4) 꼭 필요한 부수 효과 함수를 제외하고는 부수 효과를 로직에 이용하지 않는다.
+
 </script>
 
 </body>

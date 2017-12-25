@@ -8,19 +8,115 @@
 <body>
 
 <script>
+
+
 // ------ 1시간 20분
 
-// 1. reduce
-// 2. pipe
-// 3. go
-// 4. filter, map 를 reduce + go를 이용해 더 고치기
+  function add(a, b) {
+    return a + b;
+  }
 
-// 5. 커링
+  function add_all(list) {
+    return reduce(list, add);
+  }
+
+  function mult(a, b) {
+    return a * b;
+  }
+
+  function mult_all(list) {
+    return reduce(list, mult);
+  }
+
+// 1. pipe
+
+  var add10 = function(v) { return v + 10; };
+  var f1 = pipe(
+    add10,
+    function(v) { return v * 2 },
+    log);
+  f1(1);
+
+// 2. go
+  go(10,
+    add10,
+    function(v) { return v * 2 },
+    log);
+
+  go([1, 2, 3],
+    add_all,
+    function(v) { return v * 2 },
+    log);
+
+// 3. 커링
   //  1) curry
+
+  var add = curry(function(a, b) {
+    return a + b;
+  });
+
+  var add10 = add(10);
+  log( add10(20) );
+  log( add(30, 20) );
+  log( add(30)(30) );
+
+  var sub = curry(function(a, b) {
+    return a - b;
+  });
+  log( sub(10, 5) );
+
+  var sub5 = sub(5);
+  log( sub5(20) );
+
   //  2) curryr
 
-// 6. get 만들어서 적용하기
-// 7. 파이프라인
+  var sub = curryr(function(a, b) {
+    return a - b;
+  });
+  log( sub(10, 5) );
+
+  var sub5 = sub(5);
+  log( sub5(20) );
+
+// 4. get 만들어서 적용하기
+var products = [
+  {
+    id: 1,
+    name: "반팔티",
+    price: 10000,
+    sizes: ["L", "XL", "2XL"]
+  },
+  {
+    id: 2,
+    name: "후드티",
+    price: 31000,
+    sizes: ["L", "XL"]
+  },
+  {
+    id: 3,
+    name: "맨투맨",
+    price: 19000,
+    sizes: ["L"]
+  },
+  {
+    id: 4,
+    name: "롱패딩",
+    price: 110000,
+    sizes: ["M", "L"]
+  }
+];
+
+log(map(filter(products, function(p) {
+  return p.price >= 20000;
+}), get('name')));
+
+// 5. 파이프라인
+go(products,
+  filter(function(p) { return p.price >= 20000; }),
+  map(get('name')),
+  log)
+
+// 6. filter, map을 reduce + go를 이용해 더 고치기
 
 // ------ 2시간
 // ------ 쉬는 시간

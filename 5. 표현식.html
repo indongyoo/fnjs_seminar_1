@@ -8,14 +8,65 @@
 <body>
 
 <script>
-// ------ 2시간 10분
+function ternary() {
+  var predi = pipe.apply(null, arguments);
+  return function() {
+    var left = pipe.apply(null, arguments);
+    return function() {
+      var right = pipe.apply(null, arguments);
+      return function(arg) {
+        return go(arg, predi, function(condition) {
+          return condition ? left(arg) : right(arg);
+        });
+      }
+    }
+  }
+}
+
+go(2,
+  ternary(function(a) { return a == 1 })
+    ( function(a) { return a; },
+      function(a) { return a; },
+      function(a) { return a; },
+      function(a) { return a; } )
+    ( function(a) { return a; },
+      function(a) { return a; } ),
+  log);
+
+function fif() {
+  var t = ternary.apply(null, arguments);
+  function if_then(arg) {
+    return t(function() {})(arg);
+  }
+  if_then.else = function() {
+    return t.apply(null, arguments);
+  };
+  return function() {
+    t = t.apply(null, arguments);
+    return if_then;
+  };
+}
+
+go(3,
+  fif (function(v) { return v == 1 }) (
+    function(v) { return v + 10; }
+  ). else (
+    fif (function(v) { return v == 2 }) (
+      function(v) { return v + 100; }
+    ) .else (
+      function(v) { return v + 1000; }
+    )
+  ),
+  function(v) {
+    console.log(v);
+  });
 
 // 1. fif () () 만들기
   // 1) 그 전에 findval과 find 만들기
   // 2) fif () () 만들기
-
+/*
 function findval(list, predi) {
-  var i = 0, count = length(list);
+  var i = 0, count = list.length;
   return function recur(memo) {
     while (memo === undefined && i < count) memo = predi(list[i++]);
     return memo && memo.constructor == Promise ? memo.then(recur) : memo;
@@ -38,11 +89,12 @@ go(
   }),
   log);
 
-function fif() {
+
+/!*function fif() {
   var pbs = [];
   evaluation.else_if = predi;
   evaluation.else = function() {
-    return predi(function() { return true }).apply(null, arguments);
+    return predi(function() { return true; }).apply(null, arguments);
   };
   return predi.apply(null, arguments);
 
@@ -61,16 +113,13 @@ function fif() {
   }
 }
 
-
 fif (v=> v == 10) (
   v => console.log('fif', v)
 ) .else_if (v=> v == 20) (
   v => console.log('else_if', v)
 ) .else (
   v => console.log('else', v)
-) (30)
-
-// ------ 2시간 30분
+) (30)*!/*/
 
 </script>
 
