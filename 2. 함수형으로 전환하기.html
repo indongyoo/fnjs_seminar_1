@@ -9,34 +9,14 @@
 
 <script>
 
-var products = [
-  {
-    id: 1,
-    name: "반팔티",
-    price: 10000,
-    sizes: ["L", "XL", "2XL"]
-  },
-  {
-    id: 2,
-    name: "후드티",
-    price: 31000,
-    sizes: ["L", "XL"]
-  },
-  {
-    id: 3,
-    name: "맨투맨",
-    price: 19000,
-    sizes: ["L"]
-  },
-  {
-    id: 4,
-    name: "롱패딩",
-    price: 110000,
-    sizes: ["M", "L"]
-  }
-];
+  var products = [
+    { id: 1, name: "반팔티", price: 10000, sizes: ["L", "XL", "2XL"] },
+    { id: 2, name: "후드티", price: 31000, sizes: ["L", "XL"] },
+    { id: 3, name: "맨투맨", price: 19000, sizes: ["L"] },
+    { id: 4, name: "롱패딩", price: 110000, sizes: ["M", "L"] }
+  ];
 
-// 1. 명령형 코드
+  // 1. 명령형 코드
   // 1) 20,000원 이상인 상품을 거른다.
   var temp_products = [];
   var i = -1, l = products.length;
@@ -46,7 +26,6 @@ var products = [
     }
   }
   log(temp_products);
-
   // 2) 20,000원 이상의 상품의 이름을 수집해서 출력한다.
   var names = [];
   var i = -1, l = temp_products.length;
@@ -54,8 +33,8 @@ var products = [
     names.push(temp_products[i].name);
   }
   log(names);
-
   // 3) 20,000원 미만인 상품을 거른다.
+
   var temp_products = [];
   var i = -1, l = products.length;
   while (++i < l) {
@@ -73,75 +52,72 @@ var products = [
   }
   log(prices);
 
-// 2. filter, map으로 리팩토링
+  // 2. filter, map으로 리팩토링
 
-  var over_20000 = filter(products, function(product) {
-    return product.price >= 20000;
-  });
-  console.log(over_20000);
 
-  var names = map(over_20000, function(product) {
-    return product.name;
-  });
-  console.log(names);
+  log( filter(products, function(p) { return p.price >= 20000; }) );
+  log( filter(products, function(p) { return p.price < 20000; }) );
 
-  var under_20000 = filter(products, function(product) {
-    return product.price < 20000;
-  });
-  console.log(under_20000);
+  log( filter([1, 2, 3, 4], function(num) { return !(num % 2); }) );
 
-  var prices = map(under_20000, function(product) {
-    return product.price;
-  });
-  console.log(prices);
+  var over_20000 = filter(products, function(p) { return p.price >= 20000; })
+  log( map(over_20000, function(p) {
+    return p.name;
+  }) );
 
   log(map(
-    log(filter(products, function(product) { return product.price >= 20000; })),
-    function(product) { return product.name; }));
+    log(filter(products, function(p) { return p.price < 20000; })),
+    function(p) { return p.price }));
 
-  log(map(
-    log(filter(products, function(product) { return product.price < 20000; })),
-    function(product) { return product.price; }));
-
-// 3. 다형성
+  // 3. 다형성
   // 1) 외부
-    //  - Array.prototype 과 비교
-    //  - length
+  //  - Array.prototype 과 비교
+  log( [1, 2, 3, 4].map(function(v) {
+    return v + 10;
+  }) );
+
+  log( [1, 2, 3, 4].filter(function(v) {
+    return v % 2;
+  }) );
+
+  log( map(sel('*'), function(node) {
+    return node.nodeName;
+  }) );
+
+  log( map({ 0: 10, 1: 20, 2: 100, length: 3 }, function(num) {
+    return num + 100;
+  }) );
+
+  //  - length
   // 2) 내부
 
-// ------ 50분
-// ------ 쉬는시간 5분
-
-// 4. add, add_all, mult, mult_all
-// 5. add_all, mult_all에서 reduce 로직 꺼내기
-
-// ------ 1시간 20분
+  // 4. add, add_all, mult, mult_all
   function add(a, b) {
     return a + b;
+  }
+  function mult(a, b) {
+    return a * b;
   }
 
   function add_all(list) {
     return reduce(list, add);
   }
-  log( add_all([1, 2, 3, 4]) );
-
-  function mult(a, b) {
-    return a * b;
-  }
-
   function mult_all(list) {
     return reduce(list, mult);
   }
-  log( mult_all([1, 2, 3, 4]) );
+  log( add_all([1,2,3,4]) );
+  log( mult_all([1,2,3,4]) );
 
-  log(reduce([1, 2, 3, 4], add));
-  log(reduce([1, 2, 3, 4], mult));
+  log( reduce([1,2,3,4], add) );
+  log( reduce([1,2,3,4], mult) );
 
-  log(reduce([1, 2, 3, 4], add, 2));
-  log(reduce([1, 2, 3, 4], mult, 2));
+  // 5. add_all, mult_all에서 reduce 로직 꺼내기
 
-  reduce([1, 2, 3, 4], add);
-  // => add(add(add(1, 2), 3), 4);
+  log( reduce([1,2,3,4], function(memo, num) {
+    memo.num += num;
+    return memo;
+  }, { num: 20 }) );
+
 </script>
 
 </body>

@@ -2,125 +2,85 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>함수형으로 전환하기</title>
+  <title>함수 조합</title>
   <script src="js/functional.js"></script>
 </head>
 <body>
 
 <script>
 
+  // 1. pipe
 
-// ------ 1시간 20분
-
-  function add(a, b) {
-    return a + b;
-  }
-
-  function add_all(list) {
-    return reduce(list, add);
-  }
-
-  function mult(a, b) {
-    return a * b;
-  }
-
-  function mult_all(list) {
-    return reduce(list, mult);
-  }
-
-// 1. pipe
-
-  var add10 = function(v) { return v + 10; };
   var f1 = pipe(
-    add10,
-    function(v) { return v * 2 },
-    log);
-  f1(1);
-
-// 2. go
-  go(10,
-    add10,
-    function(v) { return v * 2 },
+    function(v) { return v + 10; },
+    function(v) { return v + 100; },
+    function(v) { return v / 2; },
     log);
 
-  go([1, 2, 3],
-    add_all,
-    function(v) { return v * 2 },
+  f1(100);
+  f1(200);
+  f1(300);
+
+  // 2. go
+  go(100,
+    function(v) { return v + 10; },
+    function(v) { return v + 100; },
+    function(v) { return v / 2; },
     log);
 
-// 3. 커링
+  // 3. 커링
   //  1) curry
 
   var add = curry(function(a, b) {
     return a + b;
   });
 
-  var add10 = add(10);
-  log( add10(20) );
-  log( add(30, 20) );
-  log( add(30)(30) );
-
-  var sub = curry(function(a, b) {
-    return a - b;
-  });
-  log( sub(10, 5) );
-
-  var sub5 = sub(5);
-  log( sub5(20) );
-
-  //  2) curryr
+  console.log( add(10, 5) );
+  console.log( add(10)(10) );
 
   var sub = curryr(function(a, b) {
     return a - b;
   });
-  log( sub(10, 5) );
+  var sub10 = sub(10);
+  log( sub10(5));
 
-  var sub5 = sub(5);
-  log( sub5(20) );
+  //  2) curryr
 
-// 4. get 만들어서 적용하기
-var products = [
-  {
-    id: 1,
-    name: "반팔티",
-    price: 10000,
-    sizes: ["L", "XL", "2XL"]
-  },
-  {
-    id: 2,
-    name: "후드티",
-    price: 31000,
-    sizes: ["L", "XL"]
-  },
-  {
-    id: 3,
-    name: "맨투맨",
-    price: 19000,
-    sizes: ["L"]
-  },
-  {
-    id: 4,
-    name: "롱패딩",
-    price: 110000,
-    sizes: ["M", "L"]
-  }
-];
+  // 4. get 만들어서 적용하기
 
-log(map(filter(products, function(p) {
-  return p.price >= 20000;
-}), get('name')));
+  // 5. 파이프라인
 
-// 5. 파이프라인
-go(products,
-  filter(function(p) { return p.price >= 20000; }),
-  map(get('name')),
-  log)
+  var products = [
+    { id: 1, name: "반팔티", price: 10000, sizes: ["L", "XL", "2XL"] },
+    { id: 2, name: "후드티", price: 31000, sizes: ["L", "XL"] },
+    { id: 3, name: "맨투맨", price: 19000, sizes: ["L"] },
+    { id: 4, name: "롱패딩", price: 110000, sizes: ["M", "L"] }
+  ];
 
-// 6. filter, map을 reduce + go를 이용해 더 고치기
+  log(map(
+    filter(products, function(p) { return p.price < 20000; }),
+    function(p) { return p.price }));
 
-// ------ 2시간
-// ------ 쉬는 시간
-// ------ 2시간 10분
+  go(products,
+    function(products) {
+      return filter(products, function(p) { return p.price < 20000; })
+    },
+    function(products) {
+      return map(products, function(p) { return p.price })
+    },
+    log);
+
+  window.get = curryr(function(obj, key) {
+    return obj[key];
+  });
+
+  go(products,
+    filter(p => p.price < 20000),
+    map(get('name')),
+    log);
+
+  // 6. filter, map을 reduce + go를 이용해 더 고치기
+
 </script>
 
 </body>

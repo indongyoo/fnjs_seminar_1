@@ -52,6 +52,7 @@ function fif() {
   var t = ternary.apply(null, arguments)
     (function(v) { return a(v); })
     (function(v) { return b(v); });
+
   t.else = function() { return b = pipe.apply(null, arguments), t; };
   return function() { return a = pipe.apply(null, arguments), t; }
 }
@@ -69,6 +70,8 @@ go(3,
   function(v) {
     console.log(v);
   });
+
+// 위 ternary와 fif는 모두 비동기 제어가 된다.
 </script>
 
 </body>

@@ -1,55 +1,55 @@
-function log(arg) {
-  console.log(arg);
-  return arg;
+function log(val) {
+  console.log.apply(console, arguments);
+  return val;
+}
+
+function sel1(selector) {
+  return document.querySelector(selector);
+}
+
+function sel(selector) {
+  return document.querySelectorAll(selector);
+}
+
+function set(obj, key, val) {
+  obj[key] = val;
+  return obj;
 }
 
 function constant(v) {
-  return function() {
+  return function() { //<-- 클로저
     return v;
   }
 }
 
-function set_attr(obj, key, val) {
-  obj.setAttribute(key, val);
-  return obj; // <--- 리턴하는식으로
+function repeat(count, fn) {
+  var i = -1;
+  while (++i < count) fn(i);
 }
 
-function sel1(sel) {
-  return document.querySelector(sel);
-}
-
-function sel(sel) {
-  return document.querySelectorAll(sel);
-}
-
-function append(list, child) {
-  return list.push(child), list;
+function append(list, val) {
+  return list.push(val), list;
 }
 
 window.filter = curryr(function(list, predicate) {
   return reduce(list, function(new_list, val) {
-    return go(val, predicate, evd => evd ? append(new_list, val) : new_list);
+    return predicate(val) ? append(new_list, val) : new_list;
+    return go(val, predicate, t => t ? append(new_list, val) : new_list);
   }, []);
 });
 
 window.map = curryr(function(list, mapper) {
   return reduce(list, function(new_list, val) {
-    return go(val, mapper, evd => append(new_list, evd));
+    return go(val, mapper, v => append(new_list, v));
   }, []);
 });
 
-window.each = curryr(function(list, iter) {
-  return reduce(list, function(list, val) {
-    return go(val, iter, constant(list));
-  }, list);
-});
-
-function reduce(list, iter, memo) {
+function reduce(list, fn, memo) {
   var i = 0, l = list.length;
   return function recur(memo) {
     while (i < l) {
       if (memo && memo.constructor == Promise) return memo.then(recur);
-      memo = iter(memo, list[i++]);
+      memo = fn(memo, list[i++]);
     }
     return memo;
   } (memo === undefined ? list[i++] : memo);
@@ -72,16 +72,13 @@ function go() {
 
 function curry(fn) {
   return function(a, b) {
-    return arguments.length == 1 ? function(b) { return fn(a, b); } : fn(a, b);
+    return arguments.length == 2 ? fn(a, b) : function(b) { return fn(a, b); }
   }
 }
 
 function curryr(fn) {
   return function(a, b) {
-    return arguments.length == 1 ? function(b) { return fn(b, a); } : fn(a, b);
+    return arguments.length == 2 ? fn(a, b) : function(b) { return fn(b, a); }
   }
 }
 
-window.get = curryr(function(obj, key) {
-  return obj[key];
-});
