@@ -86,7 +86,8 @@
     var context = sel1('#canvas1').getContext('2d');
     console.time()
     go(infos,
-      cmap(function(info) {
+      //map(function(info) { // 약 3000ms
+      cmap(function(info) { // 약 300ms
         return new Promise(function(resolve) {
           var image = new Image();
           image.onload = function() {
