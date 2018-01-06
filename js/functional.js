@@ -1,14 +1,14 @@
-function log(val) {
+function log(v) {
   console.log.apply(console, arguments);
-  return val;
+  return v;
+}
+
+function add(a, b) {
+  return a + b;
 }
 
 function sel1(selector) {
   return document.querySelector(selector);
-}
-
-function sel(selector) {
-  return document.querySelectorAll(selector);
 }
 
 function set(obj, key, val) {
@@ -17,44 +17,93 @@ function set(obj, key, val) {
 }
 
 function constant(v) {
-  return function() { //<-- 클로저
+  return function() {
     return v;
   }
 }
 
-function repeat(count, fn) {
+function call(f) {
+  return f();
+}
+
+function repeat(count, f) {
   var i = -1;
-  while (++i < count) fn(i);
+  while (++i < count) f(i);
+}
+/*
+
+ function filter(list, predicate) {
+ var new_list = [], i = -1, l = list.length;
+ while (++i < l) predicate(list[i]) && new_list.push(list[i]);
+ return new_list;
+ }
+
+ function map(list, mapper) {
+ var new_list = [], i = -1, l = list.length;
+ while (++i < l) new_list.push(mapper(list[i]));
+ return new_list;
+ }
+ */
+
+function filter(list, predicate) {
+  return reduce(list, function(res, val) {
+    return go(val, predicate, cond => cond ? append(res, val) : res);
+  }, []);
 }
 
-function append(list, val) {
-  return list.push(val), list;
+function append(res, val) {
+  return res.push(val), res;
 }
 
-window.filter = curryr(function(list, predicate) {
-  return reduce(list, function(new_list, val) {
-    return predicate(val) ? append(new_list, val) : new_list;
-    return go(val, predicate, t => t ? append(new_list, val) : new_list);
+function map(list, mapper) {
+  return reduce(list, function(res, val) {
+    return go(val, mapper, evd => append(res, evd));
   }, []);
-});
+}
 
-window.map = curryr(function(list, mapper) {
-  return reduce(list, function(new_list, val) {
-    return go(val, mapper, v => append(new_list, v));
-  }, []);
-});
+window.map = curryr(map);
+window.filter = curryr(filter);
 
-function reduce(list, fn, memo) {
+function reduce(list, iter, memo) {
   var i = 0, l = list.length;
   return function recur(memo) {
     while (i < l) {
       if (memo && memo.constructor == Promise) return memo.then(recur);
-      memo = fn(memo, list[i++]);
+      memo = iter(memo, list[i++]);
     }
     return memo;
   } (memo === undefined ? list[i++] : memo);
 }
 
+function add_all(list) {
+  return reduce(list, add);
+}
+function mult(a, b) {
+  return a * b;
+}
+function mult_all(list) {
+  return reduce(list, mult);
+}
+
+function square(v) {
+  return v * v;
+}
+
+
+function curry(f) {
+  return function(a, b) {
+    return arguments.length == 2 ? f(a, b) : function(b) {
+      return f(a, b);
+    };
+  }
+}
+function curryr(f) {
+  return function(a, b) {
+    return arguments.length == 2 ? f(a, b) : function(b) {
+      return f(b, a);
+    };
+  }
+}
 function callr(arg, f) {
   return f(arg);
 }
@@ -65,20 +114,6 @@ function pipe() {
     return reduce(fns, callr, arg);
   }
 }
-
 function go() {
   return reduce(arguments, callr);
 }
-
-function curry(fn) {
-  return function(a, b) {
-    return arguments.length == 2 ? fn(a, b) : function(b) { return fn(a, b); }
-  }
-}
-
-function curryr(fn) {
-  return function(a, b) {
-    return arguments.length == 2 ? fn(a, b) : function(b) { return fn(b, a); }
-  }
-}
-

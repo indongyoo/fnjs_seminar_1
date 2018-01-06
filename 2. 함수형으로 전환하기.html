@@ -8,7 +8,6 @@
 <body>
 
 <script>
-
   var products = [
     { id: 1, name: "반팔티", price: 10000, sizes: ["L", "XL", "2XL"] },
     { id: 2, name: "후드티", price: 31000, sizes: ["L", "XL"] },
@@ -17,7 +16,7 @@
   ];
 
   // 1. 명령형 코드
-  // 1) 20,000원 이상인 상품을 거른다.
+  //   1) 20,000원 이상인 상품을 거른다.
   var temp_products = [];
   var i = -1, l = products.length;
   while (++i < l) {
@@ -26,15 +25,16 @@
     }
   }
   log(temp_products);
-  // 2) 20,000원 이상의 상품의 이름을 수집해서 출력한다.
+
+  //   2) 20,000원 이상의 상품의 이름을 수집해서 출력한다.
   var names = [];
   var i = -1, l = temp_products.length;
   while (++i < l) {
     names.push(temp_products[i].name);
   }
   log(names);
-  // 3) 20,000원 미만인 상품을 거른다.
 
+  //   3) 20,000원 미만인 상품을 거른다.
   var temp_products = [];
   var i = -1, l = products.length;
   while (++i < l) {
@@ -44,7 +44,7 @@
   }
   log(temp_products);
 
-  // 4) 20,000원 미만인 상품의 가격을 수집해서 출력한다.
+  //   4) 20,000원 미만인 상품의 가격을 수집해서 출력한다.
   var prices = [];
   var i = -1, l = temp_products.length;
   while (++i < l) {
@@ -52,71 +52,82 @@
   }
   log(prices);
 
+
+  log( filter(products, function(p) {
+    return p.price >= 20000;
+  }) );
+
+  log( filter(products, function(p) {
+    return p.price < 20000;
+  }) );
+
+  log( filter([1, 2, 3, 4], function(n) {
+    return n % 2;
+  }) );
   // 2. filter, map으로 리팩토링
 
-
-  log( filter(products, function(p) { return p.price >= 20000; }) );
-  log( filter(products, function(p) { return p.price < 20000; }) );
-
-  log( filter([1, 2, 3, 4], function(num) { return !(num % 2); }) );
-
-  var over_20000 = filter(products, function(p) { return p.price >= 20000; })
+  var over_20000 = filter(products, function(p) {
+    return p.price >= 20000;
+  });
   log( map(over_20000, function(p) {
     return p.name;
   }) );
 
-  log(map(
-    log(filter(products, function(p) { return p.price < 20000; })),
-    function(p) { return p.price }));
+  log( map(filter(products, function(p) {
+    return p.price < 20000;
+  }), function(p) {
+    return p.price;
+  }) );
 
   // 3. 다형성
-  // 1) 외부
-  //  - Array.prototype 과 비교
-  log( [1, 2, 3, 4].map(function(v) {
-    return v + 10;
-  }) );
+    // 1) 외부
+    //  - Array.prototype 과 비교
+    function square(v) {
+      return v * v;
+    }
+    log( [1, 2, 3].map(square) );
 
-  log( [1, 2, 3, 4].filter(function(v) {
-    return v % 2;
-  }) );
+    log( map(document.querySelectorAll('*'), function(node) {
+      return node.nodeName;
+    }) );
 
-  log( map(sel('*'), function(node) {
-    return node.nodeName;
-  }) );
+  log( map({ 0: 1, 1: 2, 2: 3, length: 3 }, square) );
 
-  log( map({ 0: 10, 1: 20, 2: 100, length: 3 }, function(num) {
-    return num + 100;
-  }) );
-
-  //  - length
-  // 2) 내부
+    // 2) 내부
 
   // 4. add, add_all, mult, mult_all
-  function add(a, b) {
-    return a + b;
+  function add_all(list) {
+    return reduce(list, add);
   }
   function mult(a, b) {
     return a * b;
   }
-
-  function add_all(list) {
-    return reduce(list, add);
-  }
   function mult_all(list) {
     return reduce(list, mult);
   }
-  log( add_all([1,2,3,4]) );
-  log( mult_all([1,2,3,4]) );
+  log( add_all([1, 2, 3, 4]) );
+  log( mult_all([1, 2, 3, 4]) );
 
-  log( reduce([1,2,3,4], add) );
-  log( reduce([1,2,3,4], mult) );
+  function reduce(list, iter, memo) {
+    var i = 0, l = list.length, memo = memo === undefined ? list[i++] : memo;
+    while (i < l) {
+      memo = iter(memo, list[i++]);
+    }
+    return memo;
+  }
+  log( reduce([1, 2, 3, 4], add, 10) );
+  log( reduce([1, 2, 3, 4], mult) );
 
   // 5. add_all, mult_all에서 reduce 로직 꺼내기
+  // 6. total_price
 
-  log( reduce([1,2,3,4], function(memo, num) {
-    memo.num += num;
-    return memo;
-  }, { num: 20 }) );
+  log( reduce(products, function(total, p) {
+    return add(total, p.price);
+  }, 0) );
+
+  log( reduce(map(products, function(p) {
+    return p.price;
+  }), add) );
 
 </script>
 

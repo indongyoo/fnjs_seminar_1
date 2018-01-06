@@ -11,43 +11,77 @@
 
   // 1. pipe
 
-  var f1 = pipe(
-    function(v) { return v + 10; },
-    function(v) { return v + 100; },
-    function(v) { return v / 2; },
-    log);
+  function callr(arg, f) {
+    return f(arg);
+  }
 
-  f1(100);
-  f1(200);
-  f1(300);
+  function pipe() {
+    var fns = arguments;
+    return function(arg) {
+      return reduce(fns, callr, arg);
+    }
+  }
+
+  var f1 = pipe(
+    function(a) { return a + 1 },
+    function(a) { return a + 2 },
+    function(a) { return a + 100 });
+
+  log( f1(10) );
+
+  function go() {
+    return reduce(arguments, callr);
+  }
+
+  go(10,
+    function(a) { return a + 1 },
+    function(a) { return a + 2 },
+    function(a) { return a + 100 },
+    log);
 
   // 2. go
-  go(100,
-    function(v) { return v + 10; },
-    function(v) { return v + 100; },
-    function(v) { return v / 2; },
-    log);
 
   // 3. 커링
   //  1) curry
+  function curry(f) {
+    return function(a, b) {
+      return arguments.length == 2 ? f(a, b) : function(b) {
+        return f(a, b);
+      };
+    }
+  }
+  function curryr(f) {
+    return function(a, b) {
+      return arguments.length == 2 ? f(a, b) : function(b) {
+        return f(b, a);
+      };
+    }
+  }
 
   var add = curry(function(a, b) {
     return a + b;
   });
+  log( add(10)(5) );
+  log( add(10, 5) );
 
-  console.log( add(10, 5) );
-  console.log( add(10)(10) );
+  go(10,
+    add(1),
+    add(2),
+    add(100),
+    log);
 
   var sub = curryr(function(a, b) {
     return a - b;
   });
   var sub10 = sub(10);
-  log( sub10(5));
+  log( sub10(5) );
 
   //  2) curryr
 
   // 4. get 만들어서 적용하기
-
+  var get = curryr(function(obj, key) {
+    return obj[key];
+  });
   // 5. 파이프라인
 
   var products = [
@@ -57,26 +91,26 @@
     { id: 4, name: "롱패딩", price: 110000, sizes: ["M", "L"] }
   ];
 
-  log(map(
-    filter(products, function(p) { return p.price < 20000; }),
-    function(p) { return p.price }));
+  console.clear();
+
+  log( map(filter(products, function(p) {
+    return p.price < 20000;
+  }), get('price')) );
 
   go(products,
     function(products) {
-      return filter(products, function(p) { return p.price < 20000; })
+      return filter(function(p) {
+        return p.price < 20000;
+      })(products)
     },
     function(products) {
-      return map(products, function(p) { return p.price })
+      return map(get('price'))(products);
     },
     log);
 
-  window.get = curryr(function(obj, key) {
-    return obj[key];
-  });
-
   go(products,
     filter(p => p.price < 20000),
-    map(get('name')),
+    map(get('price')),
     log);
 
   // 6. filter, map을 reduce + go를 이용해 더 고치기
